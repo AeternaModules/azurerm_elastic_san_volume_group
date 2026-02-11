@@ -23,7 +23,7 @@ resource "azurerm_elastic_san_volume_group" "elastic_san_volume_groups" {
   }
 
   dynamic "network_rule" {
-    for_each = each.value.network_rule != null ? [each.value.network_rule] : []
+    for_each = each.value.network_rule != null ? each.value.network_rule : []
     content {
       action    = network_rule.value.action
       subnet_id = network_rule.value.subnet_id

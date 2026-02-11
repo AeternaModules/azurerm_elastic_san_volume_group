@@ -21,8 +21,8 @@ EOT
   type = map(object({
     elastic_san_id  = string
     name            = string
-    encryption_type = optional(string, "EncryptionAtRestWithPlatformKey")
-    protocol_type   = optional(string, "Iscsi")
+    encryption_type = optional(string) # Default: "EncryptionAtRestWithPlatformKey"
+    protocol_type   = optional(string) # Default: "Iscsi"
     encryption = optional(object({
       key_vault_key_id          = string
       user_assigned_identity_id = optional(string)
@@ -31,10 +31,18 @@ EOT
       identity_ids = optional(set(string))
       type         = string
     }))
-    network_rule = optional(object({
-      action    = optional(string, "Allow")
+    network_rule = optional(list(object({
+      action    = optional(string) # Default: "Allow"
       subnet_id = string
-    }))
+    })))
   }))
+  validation {
+    condition = alltrue([
+      for k, v in var.elastic_san_volume_groups : (
+        v.network_rule == null || (length(v.network_rule) >= 1)
+      )
+    ])
+    error_message = "Each network_rule list must contain at least 1 items"
+  }
 }
 
